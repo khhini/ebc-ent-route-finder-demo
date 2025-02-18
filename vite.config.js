@@ -19,6 +19,13 @@ export default defineConfig(({mode}) => {
   const {GOOGLE_MAPS_API_KEY = ''} = loadEnv(mode, process.cwd(), '');
 
   return {
+    server: {
+      host: true,
+      port: process.env.PORT || 8080,
+      strictPort: true,
+      cors: true,
+      allowedHosts: true,
+    },
     define: {
       'process.env.GOOGLE_MAPS_API_KEY': JSON.stringify(GOOGLE_MAPS_API_KEY)
     },
