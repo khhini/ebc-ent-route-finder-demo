@@ -36,15 +36,37 @@ const Directions = ({origin, destination}) => {
     setDirectionsService(new routesLibrary.DirectionsService());
     setDirectionsRenderer(
       new routesLibrary.DirectionsRenderer({
-        draggable: false, // Only necessary for draggable markers
+        draggable: true, // Only necessary for draggable markers
         map
       })
     );
   }, [routesLibrary, map]);
 
+  // Add the following useEffect to make markers draggable
+  useEffect(() => {
+    if (!directionsRenderer) return;
+
+    // Add the listener to update routes when directions change
+    const listener = directionsRenderer.addListener(
+      'directions_changed',
+      () => {
+        const result = directionsRenderer.getDirections();
+        if (result) {
+          setRoutes(result.routes);
+        }
+      }
+    );
+
+    return () => google.maps.event.removeListener(listener);
+  }, [directionsRenderer]);
+
   // Use directions service
   useEffect(() => {
     if (!directionsService || !directionsRenderer || !origin || !destination) return;
+
+    console.log("Fetching new route for:", origin, "to", destination);
+
+    directionsRenderer.setMap(map);
 
     directionsService
       .route({
@@ -56,6 +78,7 @@ const Directions = ({origin, destination}) => {
       .then(response => {
         directionsRenderer.setDirections(response);
         setRoutes(response.routes);
+        setRouteIndex(0);
       });
 
     return () => directionsRenderer.setMap(null);
@@ -117,8 +140,6 @@ const ControlPane = ({ setOrigin, setDestination}) => {
         </li>
         <li>
           <button onClick={() => { 
-            console.log(inputOrigin);
-            console.log(inputDestination);
             setOrigin(inputOrigin); 
             setDestination(inputDestination);
           }}>
