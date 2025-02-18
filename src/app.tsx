@@ -14,7 +14,7 @@
  * limitations under the License.
 */
 
-import React, { useState, useEffect} from 'react';
+import React, { useState, useEffect, useRef} from 'react';
 import { createRoot } from "react-dom/client";
 import { APIProvider, Map, MapCameraChangedEvent, useMap, useMapsLibrary} from '@vis.gl/react-google-maps';
 
@@ -115,6 +115,33 @@ const Directions = ({origin, destination}) => {
   );
 }
 
+const AutocompleteInput = ({ placeholder, onPlaceSelected }) => {
+  const inputRef = useRef(null);
+  const placesLibrary = useMapsLibrary('places');
+
+  useEffect(() => {
+    if (!placesLibrary || !inputRef.current) return;
+
+    const autocomplete = new placesLibrary.Autocomplete(inputRef.current);
+    autocomplete.addListener("place_changed", () => {
+      const place = autocomplete.getPlace();
+      if (place && place.formatted_address) {
+        onPlaceSelected(place.formatted_address);
+      }
+    });
+
+  }, [placesLibrary]);
+
+  return (
+    <input
+      type="text"
+      ref={inputRef}
+      className="controls"
+      placeholder={placeholder}
+    />
+  );
+};
+
 const ControlPane = ({ setOrigin, setDestination}) => {
   const [inputOrigin, setInputOrigin] = useState(null);
   const [inputDestination, setInputDestination] = useState(null);
@@ -123,19 +150,15 @@ const ControlPane = ({ setOrigin, setDestination}) => {
     <div className='control-pane'>
       <ul>
         <li>
-          <input 
-            type='text' 
-            className='controls' 
-            placeholder='Enter origin'
-            onChange={(e) => setInputOrigin(e.target.value)}
+         <AutocompleteInput
+            placeholder="Enter origin"
+            onPlaceSelected={setInputOrigin}
           />
         </li>
         <li>
-          <input 
-            type='text' 
-            className='controls' 
-            placeholder='Enter origin'
-            onChange={(e) => setInputDestination(e.target.value)}
+          <AutocompleteInput
+            placeholder="Enter destination"
+            onPlaceSelected={setInputDestination}
           />
         </li>
         <li>
