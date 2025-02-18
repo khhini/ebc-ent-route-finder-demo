@@ -18,7 +18,7 @@ import React, { useState, useEffect} from 'react';
 import { createRoot } from "react-dom/client";
 import { APIProvider, Map, MapCameraChangedEvent, useMap, useMapsLibrary} from '@vis.gl/react-google-maps';
 
-const Directions = () => {
+const Directions = ({origin, destination}) => {
   const map = useMap();
   const routesLibrary = useMapsLibrary('routes');
   const [directionsService, setDirectionsService] =
@@ -44,12 +44,12 @@ const Directions = () => {
 
   // Use directions service
   useEffect(() => {
-    if (!directionsService || !directionsRenderer) return;
+    if (!directionsService || !directionsRenderer || !origin || !destination) return;
 
     directionsService
       .route({
-        origin: 'Ebco Workshop',
-        destination: 'Monas',
+        origin: origin,
+        destination: destination,
         travelMode: google.maps.TravelMode.DRIVING,
         provideRouteAlternatives: true
       })
@@ -59,7 +59,7 @@ const Directions = () => {
       });
 
     return () => directionsRenderer.setMap(null);
-  }, [directionsService, directionsRenderer]);
+  }, [directionsService, directionsRenderer, origin, destination]);
 
   // Update direction route
   useEffect(() => {
@@ -92,20 +92,63 @@ const Directions = () => {
   );
 }
 
-const App = () => (
-  <APIProvider apiKey={'AIzaSyAQOaOB1jnoSdf-hqIvWFxzn5HkNzg8_sI'} onLoad={ () => console.log('Maps API has loaded')} >
-    <Map 
-      defaultZoom={13}
-      defaultCenter={ { lat:-6.262273750432054, lng: 106.83121588674571 }}
-      mapId={'4af6d8528552277'}
-      disableDefaultUI={true}
-      onCameraChanged={ (ev: MapCameraChangedEvent) => 
-        console.log('camera changed:', ev.detail.center, 'zoom:', ev.detail.zoom)
-      }>
-      <Directions />
-    </Map>
-  </APIProvider>
-);
+const ControlPane = ({ setOrigin, setDestination}) => {
+  const [inputOrigin, setInputOrigin] = useState(null);
+  const [inputDestination, setInputDestination] = useState(null);
+
+  return (
+    <div className='control-pane'>
+      <ul>
+        <li>
+          <input 
+            type='text' 
+            className='controls' 
+            placeholder='Enter origin'
+            onChange={(e) => setInputOrigin(e.target.value)}
+          />
+        </li>
+        <li>
+          <input 
+            type='text' 
+            className='controls' 
+            placeholder='Enter origin'
+            onChange={(e) => setInputDestination(e.target.value)}
+          />
+        </li>
+        <li>
+          <button onClick={() => { 
+            console.log(inputOrigin);
+            console.log(inputDestination);
+            setOrigin(inputOrigin); 
+            setDestination(inputDestination);
+          }}>
+            Find Route
+          </button>
+        </li>
+      </ul>
+    </div>
+  )
+}
+
+const App = () => {
+  const [origin, setOrigin] = useState(null);
+  const [destination, setDestination] = useState(null);
+  return (
+    <APIProvider apiKey={'AIzaSyAQOaOB1jnoSdf-hqIvWFxzn5HkNzg8_sI'} onLoad={ () => console.log('Maps API has loaded')} >
+      <Map 
+        defaultZoom={13}
+        defaultCenter={ { lat:-6.262273750432054, lng: 106.83121588674571 }}
+        mapId={'4af6d8528552277'}
+        disableDefaultUI={true}
+        onCameraChanged={ (ev: MapCameraChangedEvent) => 
+          console.log('camera changed:', ev.detail.center, 'zoom:', ev.detail.zoom)
+        }>
+        <ControlPane setOrigin={setOrigin} setDestination={setDestination}/>
+        <Directions origin={origin} destination={destination}/>
+      </Map>
+    </APIProvider>
+  )
+};
 
 const root = createRoot(document.getElementById('app'));
 root.render(<App />);
