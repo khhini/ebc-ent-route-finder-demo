@@ -18,8 +18,10 @@ import React from 'react';
 import { createRoot } from "react-dom/client";
 import { APIProvider, Map, MapCameraChangedEvent} from '@vis.gl/react-google-maps';
 
+const API_KEY = globalThis.GOOGLE_MAPS_API_KEY ?? (process.env.GOOGLE_MAPS_API_KEY as string);
+
 const App = () => (
-  <APIProvider apiKey={'AIzaSyAQOaOB1jnoSdf-hqIvWFxzn5HkNzg8_sI'} onLoad={ () => console.log('Maps API has loaded')} >
+  <APIProvider apiKey={API_KEY} onLoad={ () => console.log('Maps API has loaded')} >
     <Map 
       defaultZoom={13}
       defaultCenter={ { lat:-6.262273750432054, lng: 106.83121588674571 }}
