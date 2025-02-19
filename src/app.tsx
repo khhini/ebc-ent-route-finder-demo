@@ -174,15 +174,16 @@ const ControlPane = ({ setOrigin, setDestination}) => {
   )
 }
 
+const API_KEY = globalThis.GOOGLE_MAPS_API_KEY ?? (process.env.GOOGLE_MAPS_API_KEY as string);
+
 const App = () => {
   const [origin, setOrigin] = useState(null);
   const [destination, setDestination] = useState(null);
   return (
-    <APIProvider apiKey={'AIzaSyAQOaOB1jnoSdf-hqIvWFxzn5HkNzg8_sI'} onLoad={ () => console.log('Maps API has loaded')} >
+    <APIProvider apiKey={API_KEY} onLoad={ () => console.log('Maps API has loaded')} >
       <Map 
         defaultZoom={13}
         defaultCenter={ { lat:-6.262273750432054, lng: 106.83121588674571 }}
-        mapId={'4af6d8528552277'}
         disableDefaultUI={true}
         onCameraChanged={ (ev: MapCameraChangedEvent) => 
           console.log('camera changed:', ev.detail.center, 'zoom:', ev.detail.zoom)
